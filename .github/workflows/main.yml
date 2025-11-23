@@ -47,11 +47,16 @@ on:
         options:
           - KSU
           - WKSU
+          - None
         default: WKSU
       ksu_commit:
         description: "Optional KernelSU commit SHA"
         required: false
         type: string
+      include_susfs:
+        description: "Include susfs?"
+        type: 'boolean'
+        default: 'false'
 
 jobs:
 
@@ -129,7 +134,7 @@ jobs:
 
     env:
       GH_TOKEN: ${{ github.token }}
-      RELEASE_NAME: "GKI Kernels With WKSU & SUSFS v1.5.12"
+      RELEASE_NAME: "GKI Kernels w/wo WKSU & SUSFS v1.5.12"
       RELEASE_BODY: ""
     steps:
       - name: Download Apache Arrow's util_free_space.sh
@@ -241,22 +246,22 @@ jobs:
             done
           fi
             
-      - name: Send Telegram Notification
-        if: inputs.release_type != 'Actions'
-        run: |
-          RELEASE_TYPE_TEXT=""
-          if [ "${{ inputs.release_type }}" == "Pre-Release" ]; then
-            RELEASE_TYPE_TEXT="🧪 *Pre-Release*"
-          else
-            RELEASE_TYPE_TEXT="🚀 *Release*"
-          fi
+      # - name: Send Telegram Notification
+      #   if: inputs.release_type != 'Actions'
+      #   run: |
+      #     RELEASE_TYPE_TEXT=""
+      #     if [ "${{ inputs.release_type }}" == "Pre-Release" ]; then
+      #       RELEASE_TYPE_TEXT="🧪 *Pre-Release*"
+      #     else
+      #       RELEASE_TYPE_TEXT="🚀 *Release*"
+      #     fi
           
-          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -F message_thread_id="${{ secrets.TELEGRAM_TOPIC_ID_GKI }}" \
-            -F text="
-            🌽 *New Kernel $RELEASE_TYPE_TEXT Uploaded*  
-            📦 *Repository:* [${{ github.repository }}](https://github.com/${{ github.repository }})  
-            ✏️ *Commit:* [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})  
-            [🔗 View GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ env.NEW_TAG }})" \
-            -F parse_mode="Markdown"
+      #     curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+      #       -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+      #       -F message_thread_id="${{ secrets.TELEGRAM_TOPIC_ID_GKI }}" \
+      #       -F text="
+      #       🌽 *New Kernel $RELEASE_TYPE_TEXT Uploaded*  
+      #       📦 *Repository:* [${{ github.repository }}](https://github.com/${{ github.repository }})  
+      #       ✏️ *Commit:* [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})  
+      #       [🔗 View GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ env.NEW_TAG }})" \
+      #       -F parse_mode="Markdown"

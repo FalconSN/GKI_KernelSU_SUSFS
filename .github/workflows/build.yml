@@ -70,7 +70,7 @@ jobs:
 
           echo "ROOT=$ROOT" >> $GITHUB_ENV
           echo "KERNEL_ROOT=$KERNEL_ROOT" >> $GITHUB_ENV
-          echo "SUSFS4KSU=$SUSFS4KSU" >> $GITHUB_ENV
+          [ "${{ inputs.include_sysfs }}" == "true" ] && echo "SUSFS4KSU=$SUSFS4KSU" >> $GITHUB_ENV
           echo "KERNEL_PATCHES=$KERNEL_PATCHES" >> $GITHUB_ENV
           echo "ANYKERNEL3=$ANYKERNEL3" >> $GITHUB_ENV
 
@@ -105,12 +105,14 @@ jobs:
       - name: Clone AnyKernel3 and Other Dependencies
         run: |
           ANYKERNEL_BRANCH="gki-2.0"
-          SUSFS_BRANCH="gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}"
-          
           git clone https://github.com/WildKernels/AnyKernel3.git -b "$ANYKERNEL_BRANCH"
-          git clone https://github.com/WildKernels/kernel_patches.git
-          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
+          # git clone https://github.com/WildKernels/kernel_patches.git
           
+      - name: Clone susfs
+        if: inputs.include_susfs == "true"
+        run: |
+          SUSFS_BRANCH="gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}"
+          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
           cd susfs4ksu
           TARGET="${{ inputs.android_version }}-${{ inputs.kernel_version }}"
           COMMIT=""
@@ -129,7 +131,7 @@ jobs:
             KSU)
               echo "Not Needed"
               ;;
-          esac
+          esac    
 
       - name: Initialize and Sync Kernel Source
         run: |
@@ -212,6 +214,7 @@ jobs:
           patch -p1 -F 3 < "$KERNEL_PATCHES/gki_ptrace.patch"
 
       - name: Add KernelSU
+        if: inputs.ksu_variant != "None"
         run: |
           cd "$KERNEL_ROOT"
           case "${{ inputs.ksu_variant }}" in
@@ -232,6 +235,7 @@ jobs:
           esac
 
       - name: Getting KernelSU Version
+        if: inputs.ksu_variant != "None"
         run: |
           cd "$KERNEL_ROOT"
 
@@ -254,6 +258,7 @@ jobs:
           echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
 
       - name: Apply SUSFS Patches for KernelSU Variants
+        if: inputs.ksu_variant != "None" && inputs.include_susfs == "true"
         run: |
           cd "$KERNEL_ROOT"
           
@@ -346,24 +351,24 @@ jobs:
           cp "$KERNEL_PATCHES/wild/hooks/scope_min_manual_hooks_v1.4.patch" ./
           patch -p1 -F 3 < scope_min_manual_hooks_v1.4.patch
 
-      - name: Apply Performance Patches
-        run: |
-          cd "$KERNEL_ROOT/common"
-          MIN_VERSION="5.16"
-          cp "$KERNEL_PATCHES/common/optimized_mem_operations.patch" ./
-          patch -p1 --forward < optimized_mem_operations.patch
-          cp "$KERNEL_PATCHES/common/file_struct_8bytes_align.patch" ./
-          patch -p1 --forward < file_struct_8bytes_align.patch
-          cp "$KERNEL_PATCHES/common/reduce_cache_pressure.patch" ./
-          patch -p1 --forward < reduce_cache_pressure.patch
-          if [ "$(printf '%s\n' "${{ inputs.kernel_version }}" "$MIN_VERSION" | sort -V | head -n1)" = "${{ inputs.kernel_version }}" ]; then
-            cp "$KERNEL_PATCHES/common/clear_page_16bytes_align.patch" ./
-            patch -p1 --forward < clear_page_16bytes_align.patch
-          else
-            cp "$KERNEL_PATCHES/common/clear_page_16bytes_align.patch" ./
-            sed -e 's/SYM_FUNC_START_PI(clear_page)/SYM_FUNC_START_PI(__pi_clear_page)/' clear_page_16bytes_align.patch > clear_page_16bytes_align__pi.patch
-            patch -p1 -F3 --forward < clear_page_16bytes_align__pi.patch
-          fi
+      # - name: Apply Performance Patches
+      #   run: |
+      #     cd "$KERNEL_ROOT/common"
+      #     MIN_VERSION="5.16"
+      #     cp "$KERNEL_PATCHES/common/optimized_mem_operations.patch" ./
+      #     patch -p1 --forward < optimized_mem_operations.patch
+      #     cp "$KERNEL_PATCHES/common/file_struct_8bytes_align.patch" ./
+      #     patch -p1 --forward < file_struct_8bytes_align.patch
+      #     cp "$KERNEL_PATCHES/common/reduce_cache_pressure.patch" ./
+      #     patch -p1 --forward < reduce_cache_pressure.patch
+      #     if [ "$(printf '%s\n' "${{ inputs.kernel_version }}" "$MIN_VERSION" | sort -V | head -n1)" = "${{ inputs.kernel_version }}" ]; then
+      #       cp "$KERNEL_PATCHES/common/clear_page_16bytes_align.patch" ./
+      #       patch -p1 --forward < clear_page_16bytes_align.patch
+      #     else
+      #       cp "$KERNEL_PATCHES/common/clear_page_16bytes_align.patch" ./
+      #       sed -e 's/SYM_FUNC_START_PI(clear_page)/SYM_FUNC_START_PI(__pi_clear_page)/' clear_page_16bytes_align.patch > clear_page_16bytes_align__pi.patch
+      #       patch -p1 -F3 --forward < clear_page_16bytes_align__pi.patch
+      #     fi
 
       - name: Add BBG
         run: |
@@ -412,6 +417,7 @@ jobs:
           sed -i 's/check_defconfig//' ./common/build.config.gki
 
       - name: Configure KernelSU Core
+        if: inputs.ksu_variant != "None"
         run: |
           cd "$KERNEL_ROOT"
           # KernelSU Configuration
@@ -473,6 +479,7 @@ jobs:
           echo "CONFIG_IP_SET_LIST_SET=y" >> "${{ env.DEFCONFIG }}"
 
       - name: Configure SUSFS
+        if: inputs.include_susfs == "true"
         run: |
           cd "$KERNEL_ROOT"
           # SUSFS Configuration
@@ -583,6 +590,17 @@ jobs:
           elif [[ "${{ inputs.android_version }}" == "android15" && "${{ inputs.kernel_version }}" == "6.6" ]]; then
             perl -i -pe 's/^(\s*)return 1$/$1print("Who Cares? Bypassing Now!")\n$1return 0/g if /if missing_symbols:/../return 1/' build/kernel/abi/check_buildtime_symbol_protection.py
           fi
+
+      - name: Enable namespace configurations
+        run: |
+          echo "# Namespace configuration" >> "${{ env.DEFCONFIG }}"
+          echo "CONFIG_UTS_NS=y" >> "${{ env.DEFCONFIG }}"
+          echo "CONFIG_TIME_NS=y" >> "${{ env.DEFCONFIG }}"
+          echo "CONFIG_IPC_NS=y" >> "${{ env.DEFCONFIG }}"
+          echo "CONFIG_USER_NS=y" >> "${{ env.DEFCONFIG }}"
+          echo "CONFIG_USER_NS_UNPRIVILEGED=y" >> "${{ env.DEFCONFIG }}"
+          echo "CONFIG_PID_NS=y" >> "${{ env.DEFCONFIG }}"
+          echo "CONFIG_NET_NS=y" >> "${{ env.DEFCONFIG }}"
 
       - name: Change Kernel Name
         run: |
