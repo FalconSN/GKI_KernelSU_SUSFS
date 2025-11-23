@@ -214,7 +214,7 @@ jobs:
           patch -p1 -F 3 < "$KERNEL_PATCHES/gki_ptrace.patch"
 
       - name: Add KernelSU
-        if: inputs.ksu_variant != "None"
+        if: inputs.ksu_variant != 'None'
         run: |
           cd "$KERNEL_ROOT"
           case "${{ inputs.ksu_variant }}" in
