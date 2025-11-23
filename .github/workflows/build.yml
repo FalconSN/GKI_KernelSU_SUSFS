@@ -109,7 +109,7 @@ jobs:
           # git clone https://github.com/WildKernels/kernel_patches.git
           
       - name: Clone susfs
-        if: inputs.include_susfs == "true"
+        if: inputs.include_susfs == true
         run: |
           SUSFS_BRANCH="gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}"
           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
@@ -235,7 +235,7 @@ jobs:
           esac
 
       - name: Getting KernelSU Version
-        if: inputs.ksu_variant != "None"
+        if: inputs.ksu_variant != 'None'
         run: |
           cd "$KERNEL_ROOT"
 
@@ -258,7 +258,7 @@ jobs:
           echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
 
       - name: Apply SUSFS Patches for KernelSU Variants
-        if: inputs.ksu_variant != "None" && inputs.include_susfs == "true"
+        if: inputs.ksu_variant != 'None' && inputs.include_susfs == true
         run: |
           cd "$KERNEL_ROOT"
           
@@ -417,7 +417,7 @@ jobs:
           sed -i 's/check_defconfig//' ./common/build.config.gki
 
       - name: Configure KernelSU Core
-        if: inputs.ksu_variant != "None"
+        if: inputs.ksu_variant != 'None'
         run: |
           cd "$KERNEL_ROOT"
           # KernelSU Configuration
@@ -479,7 +479,7 @@ jobs:
           echo "CONFIG_IP_SET_LIST_SET=y" >> "${{ env.DEFCONFIG }}"
 
       - name: Configure SUSFS
-        if: inputs.include_susfs == "true"
+        if: inputs.include_susfs == true
         run: |
           cd "$KERNEL_ROOT"
           # SUSFS Configuration
