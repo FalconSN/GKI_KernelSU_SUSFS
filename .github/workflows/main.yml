@@ -15,8 +15,8 @@ on:
       ksu_variant:
         description: "KernelSU Variant"
         type: choice
-        options: [ KSU, WKSU, Next, RKSU]
-        default: WKSU
+        options: [ KSU, None]
+        default: None
       ksu_commit:
         description: "KSU Commit (optional)"
         type: string
@@ -24,6 +24,10 @@ on:
         required: false
       build_bypass:
         description: "Build Bypass"
+        type: boolean
+        default: false
+      include_susfs:
+        description: "Include susfs"
         type: boolean
         default: false
       # Build Selection
@@ -441,59 +445,59 @@ jobs:
         done
         wait
 
-    - name: Send Telegram Notification
-      if: inputs.release_type == 'Actions'
-      run: |
-        curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-          -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-          -F message_thread_id="${{ secrets.TELEGRAM_TOPIC_ID_GKI }}" \
-          -F text="
-          🌽 *New Kernel Actions Build Finished*
-          📦 *Repository:* [${{ github.repository }}](https://github.com/${{ github.repository }})
-          ✏️ *Commit:* [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
-          [🔗 View Action Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" \
-          -F parse_mode="Markdown"
+    # - name: Send Telegram Notification
+    #   if: inputs.release_type == 'Actions'
+    #   run: |
+    #     curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+    #       -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+    #       -F message_thread_id="${{ secrets.TELEGRAM_TOPIC_ID_GKI }}" \
+    #       -F text="
+    #       🌽 *New Kernel Actions Build Finished*
+    #       📦 *Repository:* [${{ github.repository }}](https://github.com/${{ github.repository }})
+    #       ✏️ *Commit:* [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+    #       [🔗 View Action Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" \
+    #       -F parse_mode="Markdown"
 
-    - name: Send Telegram Notification
-      if: inputs.release_type != 'Actions' && needs.release.result == 'success'
-      run: |
-        RELEASE_TYPE_TEXT=""
-        if [ "${{ inputs.release_type }}" == "Pre-Release" ]; then
-          RELEASE_TYPE_TEXT="🧪 *Pre-Release*"
-        else
-          RELEASE_TYPE_TEXT="🚀 *Release*"
-        fi
+    # - name: Send Telegram Notification
+    #   if: inputs.release_type != 'Actions' && needs.release.result == 'success'
+    #   run: |
+    #     RELEASE_TYPE_TEXT=""
+    #     if [ "${{ inputs.release_type }}" == "Pre-Release" ]; then
+    #       RELEASE_TYPE_TEXT="🧪 *Pre-Release*"
+    #     else
+    #       RELEASE_TYPE_TEXT="🚀 *Release*"
+    #     fi
 
-        curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-          -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-          -F message_thread_id="${{ secrets.TELEGRAM_TOPIC_ID_GKI }}" \
-          -F text="
-          🌽 *New Kernel $RELEASE_TYPE_TEXT Uploaded*  
-          📦 *Repository:* [${{ github.repository }}](https://github.com/${{ github.repository }})  
-          ✏️ *Commit:* [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})  
-          [🔗 View GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ env.NEW_TAG }})" \
-          -F parse_mode="Markdown"
+    #     curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+    #       -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+    #       -F message_thread_id="${{ secrets.TELEGRAM_TOPIC_ID_GKI }}" \
+    #       -F text="
+    #       🌽 *New Kernel $RELEASE_TYPE_TEXT Uploaded*  
+    #       📦 *Repository:* [${{ github.repository }}](https://github.com/${{ github.repository }})  
+    #       ✏️ *Commit:* [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})  
+    #       [🔗 View GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ env.NEW_TAG }})" \
+    #       -F parse_mode="Markdown"
 
-    - name: DM Artifacts
-      if: always()
-      run: |
-        shopt -s nullglob
-        files=("$GITHUB_WORKSPACE"/*.zip)
+    # - name: DM Artifacts
+    #   if: always()
+    #   run: |
+    #     shopt -s nullglob
+    #     files=("$GITHUB_WORKSPACE"/*.zip)
 
-        if [ ${#files[@]} -eq 0 ]; then
-            echo "No ZIP files found for DM."
-            exit 0
-        fi
+    #     if [ ${#files[@]} -eq 0 ]; then
+    #         echo "No ZIP files found for DM."
+    #         exit 0
+    #     fi
 
-        if [ -z "${{ secrets.TELEGRAM_USER_ID }}" ]; then
-            echo "Error: TELEGRAM_USER_ID secret is not set."
-            exit 1
-        fi
+    #     if [ -z "${{ secrets.TELEGRAM_USER_ID }}" ]; then
+    #         echo "Error: TELEGRAM_USER_ID secret is not set."
+    #         exit 1
+    #     fi
 
-        for file in "${files[@]}"; do
-            echo "Sending $(basename "$file") to Telegram DM..."
-            curl -v -F chat_id="${{ secrets.TELEGRAM_USER_ID }}" \
-                -F document=@"$file" \
-                -F caption="📦 Build: $(basename "$file")" \
-                https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
-        done
+    #     for file in "${files[@]}"; do
+    #         echo "Sending $(basename "$file") to Telegram DM..."
+    #         curl -v -F chat_id="${{ secrets.TELEGRAM_USER_ID }}" \
+    #             -F document=@"$file" \
+    #             -F caption="📦 Build: $(basename "$file")" \
+    #             https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
+    #     done
