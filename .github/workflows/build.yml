@@ -563,9 +563,9 @@ jobs:
         EOF
 
         echo "Checking if configs were applied..."
+        
         if grep -q "CONFIG_KSU=y" "{{ env.DEFCONFIG }}" && \
-          { grep -q "CONFIG_KSU_SUSFS=y" "{{ env.DEFCONFIG }}" || {{ inputs.include_susfs == false && true || false }}; }
-           ; then
+          { grep -q "CONFIG_KSU_SUSFS=y" "${{ env.DEFCONFIG }}" || "${{ inputs.include_susfs == false && true || false }}"; }; then
            echo "SUCCESS: KSU, SUSFS, and KPROBES configs verified in ${{ env.DEFCONFIG }}"
         else
           echo "FAILED: KSU, SUSFS, or KPROBES configs missing in ${{ env.DEFCONFIG }}"
