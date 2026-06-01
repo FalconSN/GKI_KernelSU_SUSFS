@@ -302,6 +302,7 @@ jobs:
         cache_bucket: "ccache-cache"
         compression_level: 9
         github_token: ${{ secrets.MY_GITHUB_TOKEN }}
+        debug: true
 
     - name: Save lto-cache
       uses: ./.github/actions/cache-save
