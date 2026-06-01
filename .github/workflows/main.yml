@@ -104,7 +104,6 @@ jobs:
     with:
       config_file: .github/config/android14-6.1.json
       extra_configs: ${{ inputs.extra_configs }}
-      extra_configs: ${{ inputs.extra_configs }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_repo: ${{ inputs.use_repo }}
     secrets: inherit
