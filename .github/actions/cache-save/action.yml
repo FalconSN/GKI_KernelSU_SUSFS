@@ -138,7 +138,7 @@ runs:
               echo "Uploading $part..."
               if ! upload_with_retry "$part"; then
                 echo "::error::Failed to upload part $part after multiple attempts."
-                exit 1
+                exit 0
               fi
               rm -f "$part"
             done
@@ -147,7 +147,7 @@ runs:
             echo "Uploading $FILENAME..."
             if ! upload_with_retry "$FILENAME"; then
               echo "::error::Failed to upload $FILENAME after multiple attempts."
-              exit 1
+              exit 0
             fi
             rm -f "$FILENAME"
           fi
