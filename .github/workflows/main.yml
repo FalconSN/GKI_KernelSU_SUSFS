@@ -45,6 +45,9 @@ on:
           - NONE
           - FULL
         default: FULL
+      extra_configs:
+        type: string
+        required: false
       use_repo:
         description: "Use repo for downloading kernel source"
         type: boolean
@@ -60,6 +63,7 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android12-5.10.json
+      extra_configs: ${{ inputs.extra_configs }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_repo: ${{ inputs.use_repo }}
     secrets: inherit
@@ -69,6 +73,7 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android13-5.10.json
+      extra_configs: ${{ inputs.extra_configs }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_repo: ${{ inputs.use_repo }}
     secrets: inherit
@@ -78,6 +83,7 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android13-5.15.json
+      extra_configs: ${{ inputs.extra_configs }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_repo: ${{ inputs.use_repo }}
     secrets: inherit
@@ -87,6 +93,7 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android14-5.15.json
+      extra_configs: ${{ inputs.extra_configs }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_repo: ${{ inputs.use_repo }}
     secrets: inherit
@@ -96,6 +103,8 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android14-6.1.json
+      extra_configs: ${{ inputs.extra_configs }}
+      extra_configs: ${{ inputs.extra_configs }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_repo: ${{ inputs.use_repo }}
     secrets: inherit
@@ -105,6 +114,7 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android15-6.6.json
+      extra_configs: ${{ inputs.extra_configs }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_repo: ${{ inputs.use_repo }}
     secrets: inherit
@@ -114,6 +124,7 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android16-6.12.json
+      extra_configs: ${{ inputs.extra_configs }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_repo: ${{ inputs.use_repo }}
     secrets: inherit
