@@ -16,6 +16,9 @@ inputs:
   variant:
     description: 'Build variant (Normal, Bypass, Wild, boot-time)'
     required: true
+  extra_configs:
+    required: false
+    type: string
 
 runs:
   using: "composite"
@@ -32,7 +35,11 @@ runs:
         # KPatch-Next Support
         CONFIG_KALLSYMS=y
         CONFIG_KALLSYMS_ALL=y
-
         EOF
+        
+        if [ "${{ inputs.extra_configs }}" != "" ]; then
+          tr " " "\n" >> "${{ github.workspace }}/wild_gki.fragment" <<< "${{ inputs.extra_configs }}";
+        fi
+
         # CONFIG_TRIM_UNUSED_KSYMS is not set
         # add this here for later

@@ -27,6 +27,9 @@ on:
       feature_set:
         required: true
         type: string
+      extra_configs:
+        required: false
+        type: string
       use_repo:
         required: false
         type: boolean
