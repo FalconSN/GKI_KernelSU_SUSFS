@@ -169,6 +169,7 @@ jobs:
         android_version: ${{ inputs.android_version }}
         sublevel: ${{ steps.extract.outputs.sublevel }}
         variant: ${{ inputs.variant }}
+        extra_configs: ${{ inputs.extra_configs }}
 
     - name: Apply Device-Specific Patches
       uses: ./.github/actions/apply-device-patches
