@@ -35,10 +35,11 @@ runs:
         # KPatch-Next Support
         CONFIG_KALLSYMS=y
         CONFIG_KALLSYMS_ALL=y
+
         EOF
         
-        if [ "${{ inputs.extra_configs }}" != "" ]; then
-          tr " " "\n" >> "${{ github.workspace }}/wild_gki.fragment" <<< "${{ inputs.extra_configs }}";
+        if [ "${{ inputs.extra_configs }}" ]; then
+          echo "${{ inputs.extra_configs }}" | tr ' ' '\n' >> "${{ github.workspace }}/wild_gki.fragment";
         fi
 
         # CONFIG_TRIM_UNUSED_KSYMS is not set
