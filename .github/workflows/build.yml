@@ -307,6 +307,7 @@ jobs:
         compression_level: 9
         github_token: ${{ secrets.MY_GITHUB_TOKEN }}
         debug: true
+      continue-on-error: true
 
     - name: Save lto-cache
       uses: ./.github/actions/cache-save
@@ -317,6 +318,7 @@ jobs:
         cache_bucket: "lto-cache"
         compression_level: 9
         github_token: ${{ secrets.MY_GITHUB_TOKEN }}
+      continue-on-error: true
 
     - name: Save bazel-cache
       uses: ./.github/actions/cache-save
@@ -327,15 +329,17 @@ jobs:
         cache_bucket: "bazel-cache"
         compression_level: 9
         github_token: ${{ secrets.MY_GITHUB_TOKEN }}
+      continue-on-error: true
 
-    # - name: Build Bypass Kernel
-    #   env:
-    #     SOURCE_DATE_EPOCH: ${{ env.SOURCE_DATE_EPOCH }}
-    #     KBUILD_BUILD_TIMESTAMP: ${{ env.KBUILD_BUILD_TIMESTAMP }}
-    #   uses: ./.github/actions/build-kernel
-    #   with:
-    #     bypass: true
-    #     version: ${{ inputs.version }}
+    - name: Build Bypass Kernel
+      env:
+        SOURCE_DATE_EPOCH: ${{ env.SOURCE_DATE_EPOCH }}
+        KBUILD_BUILD_TIMESTAMP: ${{ env.KBUILD_BUILD_TIMESTAMP }}
+      uses: ./.github/actions/build-kernel
+      with:
+        bypass: true
+        version: ${{ inputs.version }}
+      continue-on-error: true
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v7
