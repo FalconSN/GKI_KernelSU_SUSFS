@@ -83,5 +83,7 @@ runs:
         CONFIG_BINFMT_MISC=y
         CONFIG_BINFMT_SCRIPT=y
         CONFIG_BINFMT_ELF=y
+        CONFIG_CGROUP_DEVICE=y
+        CONFIG_CGROUP_PIDS=y
         EOF
 
