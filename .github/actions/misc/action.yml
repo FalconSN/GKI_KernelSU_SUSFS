@@ -29,4 +29,9 @@ runs:
           CONFIG_TMPFS_POSIX_ACL=y
           CONFIG_KALLSYMS=y
           CONFIG_KALLSYMS_ALL=y
-          
+          CONFIG_GUNYAH=y
+          CONFIG_GUNYAH_PLATFORM_HOOKS=y
+          CONFIG_GUNYAH_QCOM_PLATFORM=y
+          CONFIG_GUNYAH_VCPU=y
+          CONFIG_GUNYAH_IRQFD=y
+          CONFIG_GUNYAH_IOEVENTFD=y
