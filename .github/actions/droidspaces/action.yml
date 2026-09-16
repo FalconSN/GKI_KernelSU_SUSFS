@@ -88,6 +88,8 @@ runs:
       with:
         config_list: |
           CONFIG_PID_NS=y
+          CONFIG_UTS_NS=y
+          CONFIG_NET_NS=y
           CONFIG_SYSVIPC=y
           CONFIG_POSIX_MQUEUE=y
           CONFIG_IPC_NS=y
